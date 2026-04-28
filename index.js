@@ -6,7 +6,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.listen(3001, () => console.log("Servidor rodando na porta 3001"));
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
 
 require("dotenv").config();
 
@@ -132,3 +133,17 @@ app.post("/tarefas", async (req, res) => {
   }
 });
 
+app.get("/historico", async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from("tarefas")
+      .select("*, materias(nome)")
+      .order("data_entrega", { ascending: true });
+
+    if (error) throw error;
+    res.json(data);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
